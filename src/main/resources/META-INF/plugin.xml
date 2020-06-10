@@ -1,0 +1,53 @@
+<idea-plugin version="2">
+    <id>com.blackfireweb.stryker</id>
+    <name>Stryker</name>
+    <version>1.2</version>
+    <vendor email="blackfireweb@gmail.com" url="https://github.com/Garethp">Garethp</vendor>
+
+    <depends>com.intellij.modules.lang</depends>
+    <depends>JavaScript</depends>
+    <depends>NodeJS</depends>
+
+    <description><![CDATA[
+        <p>Integrates <b>Stryker</b> under the common Intellij test framework.</p>
+        <h4>Features</h4>
+        <ul>
+        <li>Introduce Stryker <a href="https://www.jetbrains.com/help/idea/run-debug-configuration.html">run configuration</a> type</li>
+        <li>Create a test run from a source file or spec file</li>
+        </ul>
+        <h4>Project setup</h4>
+        <p>Just add <b>stryker-intellij-reporter</b> package dependency into your project:</p>
+        <pre>&emsp;<code>npm i stryker-intellij-reporter -D</code></pre>
+        <p>Please report all issues to https://github.com/Garethp/intellij-stryker-run-config/issues</p>
+]]>
+    </description>
+
+    <change-notes><![CDATA[
+        <p>
+        <b>1.0</b>
+        <ul>
+        <li>Add the ability to run a mutation test inside the IDE</li>
+        </ul>
+        </p>
+    ]]>
+    </change-notes>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="192.0"/>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.execution</depends>
+    -->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <configurationType implementation="com.blackfireweb.stryker.run.StrykerConfigurationType"/>
+        <runConfigurationProducer implementation="com.blackfireweb.stryker.run.StrykerRunConfigProducer"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+
+</idea-plugin>

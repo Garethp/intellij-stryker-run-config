@@ -1,0 +1,9 @@
+### Intellij ###
+/out/
+
+### Gradle ###
+.gradle
+/build/
+
+
+

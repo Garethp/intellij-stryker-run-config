@@ -26,7 +26,10 @@ class StrykerConfigurationType : ConfigurationTypeBase("StrykerConfigurationType
             override fun isApplicable(project: Project): Boolean {
                 return true
             }
+
+            override fun getId(): String = "StrykerRunConfig"
         }
+        
         addFactory(configurationFactory)
     }
 }

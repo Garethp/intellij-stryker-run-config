@@ -55,6 +55,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="com.blackfireweb.stryker.run.StrykerConfigurationType"/>
         <runConfigurationProducer implementation="com.blackfireweb.stryker.run.StrykerRunConfigProducer"/>
+        <externalAnnotator language="JavaScript" implementationClass="com.blackfireweb.stryker.run.StrykerErrorAnnotator" />
     </extensions>
 
     <actions>

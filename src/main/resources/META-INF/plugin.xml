@@ -1,7 +1,7 @@
-<idea-plugin version="2">
+<idea-plugin>
     <id>com.blackfireweb.stryker</id>
     <name>Stryker</name>
-    <version>1.2</version>
+    <version>1.0.1</version>
     <vendor email="blackfireweb@gmail.com" url="https://github.com/Garethp">Garethp</vendor>
 
     <depends>com.intellij.modules.lang</depends>
@@ -18,12 +18,23 @@
         <h4>Project setup</h4>
         <p>Just add <b>stryker-intellij-reporter</b> package dependency into your project:</p>
         <pre>&emsp;<code>npm i stryker-intellij-reporter -D</code></pre>
+        <p>And add it as a plugin to your stryker config:</p>
+        <pre>&emsp;<code>{
+    "plugins": [
+        "@stryker-mutator/*",
+         "stryker-intellij-reporter"
+     ]
+ }</code></pre>
         <p>Please report all issues to https://github.com/Garethp/intellij-stryker-run-config/issues</p>
 ]]>
     </description>
 
     <change-notes><![CDATA[
         <p>
+        <b>1.0.1</b>
+        <ul>
+        <li>Updated description instructions</li>
+        </ul>
         <b>1.0</b>
         <ul>
         <li>Add the ability to run a mutation test inside the IDE</li>
@@ -33,7 +44,7 @@
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="192.0"/>
+    <idea-version since-build="192.5728.98"/>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->

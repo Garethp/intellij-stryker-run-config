@@ -13,8 +13,13 @@ val type = ConfigurationTypeUtil.findConfigurationType(StrykerConfigurationType:
 class StrykerConfigurationType : ConfigurationTypeBase("StrykerConfigurationType", "Stryker", "Run Stryker Test", PluginIcons.STRYKER) {
     val configurationFactory: ConfigurationFactory
 
+    override fun getDisplayName(): String = "Stryker"
+
+
     init {
         configurationFactory = object : ConfigurationFactory(this) {
+            override fun getId(): String = "Stryker Run Config"
+
             override fun createTemplateConfiguration(p0: Project): RunConfiguration {
                 return StrykerRunConfig(p0, this)
             }

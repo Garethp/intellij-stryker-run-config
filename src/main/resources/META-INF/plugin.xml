@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.blackfireweb.stryker</id>
     <name>Stryker</name>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <vendor email="blackfireweb@gmail.com" url="https://github.com/Garethp">Garethp</vendor>
 
     <depends>com.intellij.modules.lang</depends>
@@ -31,6 +31,10 @@
 
     <change-notes><![CDATA[
         <p>
+        <b>1.0.3</b>
+        <ul>
+        <li>Adding ability to jump to mutation by double clicking test name</li>
+        </ul>
         <b>1.0.2</b>
         <ul>
         <li>Added plugin icon</li>

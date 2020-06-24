@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 1.0.3
+ * Adding ability to jump to mutation by double clicking test name
+
 #### Version 1.0.2
  * Added plugin icon
 

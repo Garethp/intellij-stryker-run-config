@@ -21,10 +21,8 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.containers.ContainerUtil
 
 class StrykerTestLocationProvider : SMTestLocator {
-    private val TEST_PROTOCOL_ID = "test"
-
     override fun getLocation(protocol: String, path: String, metaInfo: String?, project: Project, scope: GlobalSearchScope): List<Location<*>> {
-        return if (TEST_PROTOCOL_ID != protocol) {
+        return if (MUTANT_PROTOCOL != protocol) {
             emptyList()
         } else {
             val location = this.getTestLocation(project, path)

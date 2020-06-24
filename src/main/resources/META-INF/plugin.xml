@@ -33,6 +33,7 @@
         <p>
         <b>1.0.3</b>
         <ul>
+        <li>Show surviving mutants as inspection errors</li>
         <li>Adding ability to jump to mutation by double clicking test name</li>
         </ul>
         <b>1.0.2</b>
@@ -63,6 +64,10 @@
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="com.blackfireweb.stryker.run.StrykerConfigurationType"/>
         <runConfigurationProducer implementation="com.blackfireweb.stryker.run.StrykerRunConfigProducer"/>
+        <localInspection groupPath="Javascript" language="JavaScript" shortName="MutantSurvived" enabledByDefault="true"
+                         level="ERROR" groupBundle="messages.InspectionsBundle"
+                         groupName="Stryker"
+                         implementationClass="com.blackfireweb.stryker.run.MutationSurvivedInspection" displayName="Mutations survived"/>
     </extensions>
 
     <actions>

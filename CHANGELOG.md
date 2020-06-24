@@ -1,6 +1,7 @@
 ## Changelog
 
 #### Version 1.0.3
+ * Show surviving mutants as inspection errors
  * Adding ability to jump to mutation by double clicking test name
 
 #### Version 1.0.2

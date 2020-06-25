@@ -35,7 +35,7 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
             val interpreter: NodeJsInterpreter = NodeJsInterpreterRef.create(this.myRunConfiguration.getPersistentData().nodeJsRef).resolveNotNull(myEnv.project)
             val commandLine = NodeCommandLineUtil.createCommandLine(if (SystemInfo.isWindows) false else null)
             val reporter = myRunConfiguration.getStrykerIntelliJReporterFile()
-            var onlyElement = this.configureCommandLine(commandLine, interpreter, reporter)
+            this.configureCommandLine(commandLine, interpreter, reporter)
             val processHandler = NodeCommandLineUtil.createProcessHandler(commandLine, false)
             val consoleProperties = StrykerConsoleProperties(this.myRunConfiguration, this.myEnv.executor, StrykerTestLocationProvider(), NodeCommandLineUtil.shouldUseTerminalConsole(processHandler))
             val consoleView: ConsoleView = if (reporter != null) this.createSMTRunnerConsoleView(commandLine.workDirectory, consoleProperties) else ConsoleViewImpl(myProject, false)
@@ -63,7 +63,6 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
     }
 
     private fun configureCommandLine(commandLine: GeneralCommandLine, interpreter: NodeJsInterpreter, reporter: NodePackage?) {
-        var onlyFile: PsiElement? = null
         commandLine.charset = StandardCharsets.UTF_8
         val data = this.myRunConfiguration.getPersistentData()
 
@@ -99,21 +98,21 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
             commandLine.addParameter("--reporters")
             commandLine.addParameter("intellij")
         }
-        if (data.kind == StrykerRunConfig.TestKind.TEST || data.kind == StrykerRunConfig.TestKind.SPEC) {
+        if ((data.kind == StrykerRunConfig.TestKind.TEST || data.kind == StrykerRunConfig.TestKind.SPEC) && !isConfigFile(data.specFile ?: "")) {
             addMutateOrDie(commandLine, data)
         }
 
         if (data.kind == StrykerRunConfig.TestKind.DIRECTORY) {
-            addMutateDirectoryOrDie(commandLine, data);
+            addMutateDirectoryOrDie(commandLine, data)
         }
 
         NodeCommandLineConfigurator.find(interpreter).configure(commandLine)
     }
 
     private fun addMutateOrDie(commandLine: GeneralCommandLine, data: StrykerRunConfig.StrykerRunSettings) {
-        var file = data.specFile ?: return
+        val file = data.specFile ?: return
         val virtualFile = LocalFileSystem.getInstance().findFileByIoFile(File(file)) ?: return
-        val extension = virtualFile.extension;
+        val extension = virtualFile.extension
 
         commandLine.addParameter("--mutate")
         commandLine.addParameter(if (".spec.$extension\$".toRegex().containsMatchIn(file)) file.replace(".spec.$extension", ".$extension") else file)
@@ -121,7 +120,7 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
     }
 
     private fun addMutateDirectoryOrDie(commandLine: GeneralCommandLine, data: StrykerRunConfig.StrykerRunSettings) {
-        var directory = data.specsDir ?: return
+        val directory = data.specsDir ?: return
 
         commandLine.addParameter("--mutate")
         commandLine.addParameter("${directory}/**/*.ts,js,tsx,jsx,!${directory}/**/*.spec.ts,spec.js,spec.tsx,spec.jsx,!${directory}/**/*.test.ts,test.js,test.tsx,test.jsx")

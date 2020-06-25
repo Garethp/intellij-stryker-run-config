@@ -86,18 +86,16 @@ class StrykerRunConfig(project: Project, factory: ConfigurationFactory) : Locata
     }
 
     override fun suggestedName(): String? {
-        return when (myRunSettings.kind) {
-            TestKind.DIRECTORY -> "Mutate All Files in ${getRelativePath(project, myRunSettings.specsDir ?: return null)}"
-            TestKind.SPEC -> "Mutate ${getRelativePath(project, myRunSettings.specFile ?: return null)}"
-            TestKind.TEST -> "Mutate ${myRunSettings.allNames?.joinToString(" -> ") ?: return null}"
-        }
+        return actionName
     }
 
     override fun getActionName(): String? {
-        return when (myRunSettings.kind) {
-            TestKind.DIRECTORY -> "Mutate All Files in ${getLastPathComponent(myRunSettings.specsDir ?: return null)}"
-            TestKind.SPEC -> "Mutate ${getLastPathComponent(myRunSettings.specFile ?: return null)}"
-            TestKind.TEST -> "Mutate ${myRunSettings.allNames?.joinToString(" -> ") ?: return null}"
+        return when  {
+            myRunSettings.kind === TestKind.DIRECTORY -> "Mutate All Files in ${getRelativePath(project, myRunSettings.specsDir ?: return null)}"
+            myRunSettings.kind === TestKind.SPEC && isConfigFile(myRunSettings.specFile ?: "") -> "Run Stryker"
+            myRunSettings.kind === TestKind.SPEC -> "Mutate ${getRelativePath(project, myRunSettings.specFile ?: return null)}"
+            myRunSettings.kind === TestKind.TEST -> "Mutate ${myRunSettings.allNames?.joinToString(" -> ") ?: return null}"
+            else -> null
         }
     }
 

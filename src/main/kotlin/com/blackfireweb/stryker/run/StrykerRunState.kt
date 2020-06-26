@@ -22,12 +22,15 @@ import com.intellij.javascript.nodejs.npm.NpmUtil
 import com.intellij.javascript.nodejs.util.NodePackage
 import com.intellij.javascript.nodejs.util.NodePackageRef
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.module.ModuleManager.*
+import com.intellij.openapi.roots.ModuleRootManager
+import com.intellij.openapi.roots.ModuleRootModificationUtil
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.psi.PsiElement
 import java.io.File
 import java.nio.charset.StandardCharsets
+import java.util.*
 
 class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRunConfiguration: StrykerRunConfig) : RunProfileState {
     override fun execute(executor: Executor, runner: ProgramRunner<*>): ExecutionResult? {
@@ -71,6 +74,17 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
             commandLine.withWorkDirectory(workingDirectory)
         }
 
+        getInstance(this.myProject).modules.forEach {
+            val thisModule = it
+            ModuleRootManager.getInstance(it).contentRoots.forEach {
+                ModuleRootModificationUtil.updateExcludedFolders(
+                        thisModule,
+                        it,
+                        Collections.emptyList(),
+                        Collections.singletonList(if (!workingDirectory.isBlank()) "file://${workingDirectory}/.stryker-tmp" else "${it.url}/.stryker-tmp"))
+            }
+        }
+
         NodeCommandLineUtil.configureUsefulEnvironment(commandLine)
         val startCmd = "run"
         data.npmRef
@@ -98,7 +112,8 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
             commandLine.addParameter("--reporters")
             commandLine.addParameter("intellij")
         }
-        if ((data.kind == StrykerRunConfig.TestKind.TEST || data.kind == StrykerRunConfig.TestKind.SPEC) && !isConfigFile(data.specFile ?: "")) {
+        if ((data.kind == StrykerRunConfig.TestKind.TEST || data.kind == StrykerRunConfig.TestKind.SPEC) && !isConfigFile(data.specFile
+                        ?: "")) {
             addMutateOrDie(commandLine, data)
         }
 

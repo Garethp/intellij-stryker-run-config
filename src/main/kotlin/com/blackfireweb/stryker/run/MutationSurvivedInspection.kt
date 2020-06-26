@@ -28,7 +28,7 @@ public class MutationSurvivedInspection() : LocalInspectionTool(), ProjectManage
 
         val relevantResults = results.filter { it.startsWith(stringBeginning) }.filter { storage.getState(it)?.magnitude == 6 }
 
-        return relevantResults.map { createProblemDescriptor(it, file, manager)}.toTypedArray()
+        return relevantResults.map { createProblemDescriptor(it, file, manager) }.toTypedArray()
     }
 
     private fun transformLocationData(locationData: String): Triple<String, Pair<Int, Int>, Pair<Int, Int>> {
@@ -50,8 +50,10 @@ public class MutationSurvivedInspection() : LocalInspectionTool(), ProjectManage
         val (startLine, startColumn) = start
         val (endLine, endColumn) = end
 
-        val startOffset = PsiDocumentManager.getInstance(file.project).getDocument(file)?.getLineStartOffset(startLine - 1)?.plus(startColumn - 1) ?: 0
-        val endOffset = PsiDocumentManager.getInstance(file.project).getDocument(file)?.getLineStartOffset(endLine - 1)?.plus(endColumn - 2) ?: 0
+        val startOffset = PsiDocumentManager.getInstance(file.project).getDocument(file)?.getLineStartOffset(startLine - 1)?.plus(startColumn - 1)
+                ?: 0
+        val endOffset = PsiDocumentManager.getInstance(file.project).getDocument(file)?.getLineStartOffset(endLine - 1)?.plus(endColumn - 2)
+                ?: 0
 
         return manager.createProblemDescriptor(file.findElementAt(startOffset)!!, file.findElementAt(endOffset)!!, "Mutant Survived", ProblemHighlightType.GENERIC_ERROR, true)
     }

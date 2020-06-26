@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 1.0.4
+ * Automatically sets `.stryker-tmp` folder to be ignored by indexer
+
 #### Version 1.0.3
  * Show surviving mutants as inspection errors
  * Adding ability to jump to mutation by double clicking test name

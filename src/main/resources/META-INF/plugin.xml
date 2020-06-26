@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.blackfireweb.stryker</id>
     <name>Stryker</name>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <vendor email="blackfireweb@gmail.com" url="https://github.com/Garethp">Garethp</vendor>
 
     <depends>com.intellij.modules.lang</depends>
@@ -31,22 +31,9 @@
 
     <change-notes><![CDATA[
         <p>
-        <b>1.0.3</b>
+        <b>1.0.4</b>
         <ul>
-        <li>Show surviving mutants as inspection errors</li>
-        <li>Adding ability to jump to mutation by double clicking test name</li>
-        </ul>
-        <b>1.0.2</b>
-        <ul>
-        <li>Added plugin icon</li>
-        </ul>
-        <b>1.0.1</b>
-        <ul>
-        <li>Updated description instructions</li>
-        </ul>
-        <b>1.0</b>
-        <ul>
-        <li>Add the ability to run a mutation test inside the IDE</li>
+        <li>Automatically adds .stryker-tmp folder as excluded so that it's not indexed</li>
         </ul>
         </p>
     ]]>

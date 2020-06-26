@@ -1,16 +1,24 @@
 package com.blackfireweb.stryker.run
 
-import com.intellij.codeInspection.*
+import com.intellij.codeInspection.InspectionManager
+import com.intellij.codeInspection.LocalInspectionTool
+import com.intellij.codeInspection.ProblemDescriptor
+import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.execution.TestStateStorage
+import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.project.ProjectManagerListener
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import com.intellij.util.messages.MessageBusConnection
 
-public class MutationSurvivedInspection() : LocalInspectionTool(), ProjectManagerListener {
+class MutationSurvivedInspection() : LocalInspectionTool(), ProjectManagerListener, Disposable {
+    private val messageBus: MessageBusConnection = ApplicationManager.getApplication().messageBus.connect(this)
+
     init {
-        ProjectManager.getInstance().addProjectManagerListener(this)
+        messageBus.subscribe(ProjectManager.TOPIC, this)
     }
 
     override fun projectClosing(project: Project) {
@@ -56,5 +64,9 @@ public class MutationSurvivedInspection() : LocalInspectionTool(), ProjectManage
                 ?: 0
 
         return manager.createProblemDescriptor(file.findElementAt(startOffset)!!, file.findElementAt(endOffset)!!, "Mutant Survived", ProblemHighlightType.GENERIC_ERROR, true)
+    }
+
+    override fun dispose() {
+        messageBus.disconnect()
     }
 }

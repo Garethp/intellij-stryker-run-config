@@ -32,6 +32,7 @@ import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.WindowManager
@@ -45,6 +46,7 @@ import org.jetbrains.io.LocalFileFinder
 import java.awt.Point
 import java.io.File
 import java.net.InetSocketAddress
+import java.net.URL
 import java.util.*
 import javax.swing.event.HyperlinkEvent
 
@@ -134,7 +136,7 @@ class StrykerRunConfig(project: Project, factory: ConfigurationFactory) : Locata
         val data = getPersistentData()
         return findFile(data.specFile ?: "")
                 ?: findFile(data.specsDir ?: "")
-                ?: findFile(data.workingDirectory ?: "")
+                ?: VfsUtil.findFileByURL(URL(data.workingDirectory ?: ""))
     }
 
 

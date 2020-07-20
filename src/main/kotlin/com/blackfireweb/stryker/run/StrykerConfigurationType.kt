@@ -4,7 +4,6 @@ import com.blackfireweb.stryker.PluginIcons
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.ConfigurationTypeBase
 import com.intellij.execution.configurations.ConfigurationTypeUtil
-import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.openapi.project.Project
 import javax.swing.Icon
 
@@ -20,7 +19,7 @@ class StrykerConfigurationType : ConfigurationTypeBase("StrykerConfigurationType
         configurationFactory = object : ConfigurationFactory(this) {
             override fun getId(): String = "Stryker Run Config"
 
-            override fun createTemplateConfiguration(p0: Project): RunConfiguration {
+            override fun createTemplateConfiguration(p0: Project): StrykerRunConfig {
                 return StrykerRunConfig(p0, this)
             }
 

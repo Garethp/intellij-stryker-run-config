@@ -10,7 +10,7 @@ buildscript {
 
 
 plugins {
-    id 'org.jetbrains.intellij' version '0.4.17'
+    id 'org.jetbrains.intellij' version '0.4.21'
     id 'net.researchgate.release' version '2.6.0'
 }
 
@@ -33,18 +33,20 @@ intellij {
     pluginName 'Intellij-Stryker'
     type = 'IU'
     
-    version = 'IU-2020.1'
+    version = 'LATEST-EAP-SNAPSHOT'
     plugins = ['JavaScriptLanguage', 'NodeJS']
-
 
     downloadSources true
     updateSinceUntilBuild = false
 }
 
 runIde {
-  systemProperty("idea.auto.reload.plugins", true)
-  ideDirectory "../../.local/share/JetBrains/Toolbox/apps/WebStorm/ch-0/201.7846.79"
-  jvmArgs '-Xmx2G'
+    systemProperty("idea.auto.reload.plugins", true)
+
+    ideDirectory "../../.local/share/JetBrains/Toolbox/apps/WebStorm/ch-0/202.6397.17/"
+//    ideDirectory "../../.local/share/JetBrains/Toolbox/apps/WebStorm/ch-0/201.8538.32/"
+
+    jvmArgs '-Xmx2G'
 }
 
 repositories {

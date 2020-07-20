@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 1.0.5
+ * Adding a new "Smart Console Intention". Try typing `stryker run` into your console and hitting `Ctrl`+`Enter`
+
 #### Version 1.0.4
  * Automatically sets `.stryker-tmp` folder to be ignored by indexer
 

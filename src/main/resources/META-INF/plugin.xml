@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.blackfireweb.stryker</id>
     <name>Stryker</name>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <vendor email="blackfireweb@gmail.com" url="https://github.com/Garethp">Garethp</vendor>
 
     <depends>com.intellij.modules.lang</depends>
@@ -31,9 +31,9 @@
 
     <change-notes><![CDATA[
         <p>
-        <b>1.0.4</b>
+        <b>1.0.5</b>
         <ul>
-        <li>Automatically adds .stryker-tmp folder as excluded so that it's not indexed</li>
+        <li>Adding a new "Smart Console Intention". Try typing `stryker run` into your console and hitting `Ctrl`+`Enter`</li>
         </ul>
         </p>
     ]]>
@@ -55,6 +55,7 @@
                          level="ERROR" groupBundle="messages.InspectionsBundle"
                          groupName="Stryker"
                          implementationClass="com.blackfireweb.stryker.run.MutationSurvivedInspection" displayName="Mutations survived"/>
+        <terminal.shellCommandHandler implementation="com.blackfireweb.stryker.run.StrykerCustomCommandHandler" />
     </extensions>
 
     <actions>

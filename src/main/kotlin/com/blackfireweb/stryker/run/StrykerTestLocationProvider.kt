@@ -36,8 +36,10 @@ class StrykerTestLocationProvider : SMTestLocator {
 
     private fun getTestLocation(project: Project, locationData: String): Location<*>? {
         val (fileName, start) = transformLocationData(locationData)
+
+        val fullFileName = if (fileName.indexOf(project.basePath!!) == 0) { fileName } else { project.basePath + "/" + fileName }
         val (startLine, startColumn) = start
-        val virtualFile = LocalFileSystem.getInstance().findFileByPath(project.basePath + "/" + fileName)
+        val virtualFile = LocalFileSystem.getInstance().findFileByPath(fullFileName)
         if (virtualFile === null) return null
 
         val file = PsiManager.getInstance(project).findFile(virtualFile)

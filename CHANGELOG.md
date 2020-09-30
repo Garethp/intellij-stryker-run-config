@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 1.0.7
+ * Improve support for Stryker in workspaces, including different versions in different workspaces
+
 #### Version 1.0.6
  * If you're using Stryker v4, it'll now auto-inject the reporter for you
 

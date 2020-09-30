@@ -26,7 +26,9 @@ import com.intellij.openapi.roots.ModuleRootModificationUtil
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VfsUtil
 import java.io.File
+import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.util.*
 
@@ -108,9 +110,15 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
 
         EnvironmentVariablesData.create(data.envs, data.passParentEnvs).configureCommandLine(commandLine, true)
 
+        val packageToUse = workingDirectory.takeIf { it -> it.isNotEmpty() }
+                ?.let { directory -> VfsUtil.findFileByURL(URL(if (workingDirectory.isNotEmpty()) { "file://${directory}/src" } else {""})) }
+                ?.let { virtualFile -> NodeModuleSearchUtil.resolveModuleFromNodeModulesDir(virtualFile, "@stryker-mutator/core", NodeModuleDirectorySearchProcessor.PROCESSOR) }
+                ?.let { resolvedInfo -> NodePackage(resolvedInfo.moduleSourceRoot.path) }
+                ?: NodePackage.findDefaultPackage(myProject, "@stryker-mutator/core", interpreter)
+
         // As of Version 4 of Stryker, we can append a new plugin without destroying existing ones. So we can use a
         // bundled version of the Progress.js plugin instead of asking the user to download their own
-        if (NodePackage.findDefaultPackage(myProject, "@stryker-mutator/core", interpreter)?.version?.major!! >= 4) {
+        if (packageToUse?.version?.major!! >= 4) {
             val resource = this.javaClass.getResourceAsStream("/Progress.js")
             val tempReporterFile = File.createTempFile("stryker-intellij-reporter-", ".js")
             tempReporterFile.deleteOnExit()

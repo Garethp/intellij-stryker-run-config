@@ -31,10 +31,13 @@ class MutationSurvivedInspection() : LocalInspectionTool(), ProjectManagerListen
         val project = file.project
         val storage = TestStateStorage.getInstance(project)
 
-        val stringBeginning = "$MUTANT_PROTOCOL://" + file.virtualFile.path.replace(project.basePath + "/", "") + "::"
+        val oldStringBeginning = "$MUTANT_PROTOCOL://" + file.virtualFile.path.replace(project.basePath + "/", "") + "::"
+        val stringBeginning = "$MUTANT_PROTOCOL://" + file.virtualFile.path + "::"
         val results = storage.keys
 
-        val relevantResults = results.filter { it.startsWith(stringBeginning) }.filter { storage.getState(it)?.magnitude == 6 }
+        val relevantResults = results
+                .filter { it.startsWith(stringBeginning) || it.startsWith(oldStringBeginning) }
+                .filter { storage.getState(it)?.magnitude == 6 }
 
         return relevantResults.map { createProblemDescriptor(it, file, manager) }.toTypedArray()
     }

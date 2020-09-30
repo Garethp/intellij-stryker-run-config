@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.blackfireweb.stryker</id>
     <name>Stryker</name>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <vendor email="blackfireweb@gmail.com" url="https://github.com/Garethp">Garethp</vendor>
 
     <depends>com.intellij.modules.lang</depends>
@@ -31,9 +31,9 @@
 
     <change-notes><![CDATA[
         <p>
-        <b>1.0.5</b>
+        <b>1.0.6</b>
         <ul>
-        <li>Adding a new "Smart Console Intention". Try typing `stryker run` into your console and hitting `Ctrl`+`Enter`</li>
+        <li>If you're using Stryker v4, it'll now auto-inject the reporter for you</li>
         </ul>
         </p>
     ]]>

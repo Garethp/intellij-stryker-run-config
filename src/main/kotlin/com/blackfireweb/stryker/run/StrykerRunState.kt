@@ -12,9 +12,7 @@ import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
 import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil
 import com.intellij.execution.ui.ConsoleView
-import com.intellij.javascript.nodejs.NodeCommandLineUtil
-import com.intellij.javascript.nodejs.NodeConsoleAdditionalFilter
-import com.intellij.javascript.nodejs.NodeStackTraceFilter
+import com.intellij.javascript.nodejs.*
 import com.intellij.javascript.nodejs.interpreter.NodeCommandLineConfigurator
 import com.intellij.javascript.nodejs.interpreter.NodeJsInterpreter
 import com.intellij.javascript.nodejs.interpreter.NodeJsInterpreterRef
@@ -107,10 +105,27 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
             val params = data.additionalParams.trim().split("\\s+".toRegex()).toMutableList()
             commandLine.withParameters(params)
         }
+
         EnvironmentVariablesData.create(data.envs, data.passParentEnvs).configureCommandLine(commandLine, true)
-        reporter?.let {
+
+        // As of Version 4 of Stryker, we can append a new plugin without destroying existing ones. So we can use a
+        // bundled version of the Progress.js plugin instead of asking the user to download their own
+        if (NodePackage.findDefaultPackage(myProject, "@stryker-mutator/core", interpreter)?.version?.major!! >= 4) {
+            val resource = this.javaClass.getResourceAsStream("/Progress.js")
+            val tempReporterFile = File.createTempFile("stryker-intellij-reporter-", ".js")
+            tempReporterFile.deleteOnExit()
+            resource.use { fileOut -> fileOut.copyTo(tempReporterFile.outputStream()) }
+
+            commandLine.addParameter("--appendPlugins")
+            commandLine.addParameter(tempReporterFile.absolutePath)
+
             commandLine.addParameter("--reporters")
             commandLine.addParameter("intellij")
+        } else {
+            reporter?.let {
+                commandLine.addParameter("--reporters")
+                commandLine.addParameter("intellij")
+            }
         }
         if ((data.kind == StrykerRunConfig.TestKind.TEST || data.kind == StrykerRunConfig.TestKind.SPEC) && !isConfigFile(data.specFile
                         ?: "")) {

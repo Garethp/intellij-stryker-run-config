@@ -1,5 +1,8 @@
 ## Changelog
 
+#### Version 1.0.6
+ * If you're using Stryker v4, it'll now auto-inject the reporter for you
+
 #### Version 1.0.5
  * Adding a new "Smart Console Intention". Try typing `stryker run` into your console and hitting `Ctrl`+`Enter`
 

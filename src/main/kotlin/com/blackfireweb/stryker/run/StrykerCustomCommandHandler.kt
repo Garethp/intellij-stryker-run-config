@@ -1,12 +1,12 @@
 package com.blackfireweb.stryker.run
 
+import com.intellij.execution.Executor
 import com.intellij.execution.ProgramRunnerUtil
 import com.intellij.execution.RunManager
 import com.intellij.execution.executors.DefaultRunExecutor
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.terminal.TerminalExecutorAction
 import com.intellij.terminal.TerminalShellCommandHandler
 import com.intellij.util.execution.ParametersListUtil
 
@@ -14,7 +14,7 @@ class StrykerCustomCommandHandler : TerminalShellCommandHandler {
     private val canRun = ApplicationInfo.getInstance().build.baselineVersion >= 201
 
     @Override
-    override fun execute(project: Project, workingDirectory: String?, localSession: Boolean, command: String, executorAction: TerminalExecutorAction): Boolean = run(project, workingDirectory, command)
+    override fun execute(project: Project, workingDirectory: String?, localSession: Boolean, command: String, executor: Executor): Boolean = run(project, workingDirectory, command)
 
     @Override
     fun execute(project: Project, workingDirectory: String?, localSession: Boolean, command: String): Boolean = run(project, workingDirectory, command)

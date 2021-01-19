@@ -1,6 +1,6 @@
 package com.blackfireweb.stryker.run
 
-val MUTANT_PROTOCOL = "stryker-mutant"
+const val MUTANT_PROTOCOL = "stryker-mutant"
 
 fun isConfigFile(name: String): Boolean {
     return when {

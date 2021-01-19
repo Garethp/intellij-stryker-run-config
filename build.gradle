@@ -10,7 +10,7 @@ buildscript {
 
 
 plugins {
-    id 'org.jetbrains.intellij' version '0.4.21'
+    id 'org.jetbrains.intellij' version '0.6.5'
     id 'net.researchgate.release' version '2.6.0'
 }
 
@@ -42,8 +42,38 @@ intellij {
 runIde {
     systemProperty("idea.auto.reload.plugins", true)
 
-    ideDirectory "../../.local/share/JetBrains/Toolbox/apps/WebStorm/ch-0/202.7319.49/"
-//    ideDirectory "../../.local/share/JetBrains/Toolbox/apps/WebStorm/ch-0/201.8538.32/"
+    /**
+     * Since the intellij plugin doesn't have an easy way to refer to "latest Webstorm", we're going to go looking for
+     * our latest webstorm. I've defined a list of directories to check so that you can just add your location
+     * regardless of what platform you're on without having to remove other locations. That way you can commit in
+     * a different location for each platform (Windows, OSX, various Linux etc.). It works in the following steps
+     *
+     *  1. Look through all the directories listed and make sure they exist
+     *  2. Grab the webstorm installation directories from them (Matching something like 203.5981.135) and put it in a list
+     *  3. Sort the list by name so that we can get the ordered versions
+     *  4. Reverse the list so that the latest version is on top
+     *  5. Use the first item in the list, which should be the latest version from all the directoriesToCheck
+     */
+    def HOME = System.properties['user.home']
+    def installationsFound = []
+    def directoriesToCheck = [
+            "$HOME/.local/share/JetBrains/Toolbox/apps/WebStorm/ch-0/"
+    ]
+
+    directoriesToCheck.each {
+        def file = new File(it)
+        if (file.exists() && file.isDirectory()) {
+            file.eachDirMatch(~/^[0-9.]+$/) {
+                installationsFound.add([name: it.name, fullPath: it.getPath()])
+            }
+        }
+    }
+
+    installationsFound.sort{it.name}
+    installationsFound.reverse(true)
+    println(installationsFound.first().fullPath)
+
+    ideDirectory "${installationsFound.first().fullPath}"
 
     jvmArgs '-Xmx2G'
 }

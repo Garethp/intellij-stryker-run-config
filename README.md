@@ -1,5 +1,6 @@
 ## IntelliJ Stryker Plugin
 Integrates Stryker-JS with the intellij test runner to give you native test runner for Mutation Testing
+
 ### Build
 ```bash
 ./gradlew buildPlugin
@@ -8,8 +9,11 @@ Integrates Stryker-JS with the intellij test runner to give you native test runn
 ```bash
 ./gradlew runIdea
 ```                                             
-#### Reporter Setup
-This plugin needs a reporter added to Stryker, *stryker-intellij-reporter*. So first you need to install it as a dependency:
+#### Reporter Setup (Only if Stryker is < 4.0)
+When your version of Stryker is < 4.0, this plugin needs a reporter added to Stryker, *stryker-intellij-reporter*.
+If you have version 4.0 or newer, this plugin provides the reporter automatically, so there's no need to do anything.
+
+So if you have a version older than 4.0, first you need to install it as a dependency:
 ```bash
 npm i stryker-intellij-reporter -D
 ````

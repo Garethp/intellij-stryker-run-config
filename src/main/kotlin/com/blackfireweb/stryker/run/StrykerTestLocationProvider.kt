@@ -3,29 +3,21 @@ package com.blackfireweb.stryker.run
 import com.intellij.execution.Location
 import com.intellij.execution.PsiLocation
 import com.intellij.execution.testframework.sm.runner.SMTestLocator
-import com.intellij.javascript.testFramework.JsTestFileByTestNameIndex
-import com.intellij.javascript.testFramework.jasmine.JasmineFileStructureBuilder
-import com.intellij.javascript.testFramework.util.EscapeUtils
-import com.intellij.javascript.testFramework.util.JsTestFqn
-import com.intellij.lang.javascript.psi.JSFile
-import com.intellij.lang.javascript.psi.JSTestFileType
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.psi.PsiDocCommentBase
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.containers.ContainerUtil
 
 class StrykerTestLocationProvider : SMTestLocator {
+    private val locations = HashMap<String, Location<*>>()
+
     override fun getLocation(protocol: String, path: String, metaInfo: String?, project: Project, scope: GlobalSearchScope): List<Location<*>> {
         return if (MUTANT_PROTOCOL != protocol) {
             emptyList()
         } else {
-            val location = this.getTestLocation(project, path)
+            val location = this.getTestLocation(project, path.removePrefix("$MUTANT_PROTOCOL://"))
             return ContainerUtil.createMaybeSingletonList(location)
         }
     }
@@ -35,6 +27,10 @@ class StrykerTestLocationProvider : SMTestLocator {
     }
 
     private fun getTestLocation(project: Project, locationData: String): Location<*>? {
+        if (locations.containsKey(locationData)) {
+            return locations[locationData]
+        }
+
         val (fileName, start) = transformLocationData(locationData)
 
         val fullFileName = if (fileName.indexOf(project.basePath!!) == 0) { fileName } else { project.basePath + "/" + fileName }
@@ -47,7 +43,8 @@ class StrykerTestLocationProvider : SMTestLocator {
 
         val startOffset = PsiDocumentManager.getInstance(project).getDocument(file)?.getLineStartOffset(startLine - 1)?.plus(startColumn - 1) ?: 0
 
-        return PsiLocation.fromPsiElement(file.findElementAt(startOffset))
+        locations[locationData] = PsiLocation.fromPsiElement(file.findElementAt(startOffset))
+        return locations[locationData]
     }
 
     private fun transformLocationData(locationData: String): Triple<String, Pair<Int, Int>, Pair<Int, Int>> {

@@ -1,5 +1,11 @@
 ## Changelog
 
+#### Version 1.0.8
+ * Improved the accuracy of mutants when the user changes the file before navigating to the mutant results
+ * Expanded smart terminal commands to work with the following
+   * `yarn stryker run`
+   * `yarn [command]` where `[command]` starts with `stryker run` (for example `yarn test:mutation`)
+
 #### Version 1.0.7
  * Improve support for Stryker in workspaces, including different versions in different workspaces
 

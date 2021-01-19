@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.blackfireweb.stryker</id>
     <name>Stryker</name>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
     <vendor email="blackfireweb@gmail.com" url="https://github.com/Garethp">Garethp</vendor>
 
     <depends>com.intellij.modules.lang</depends>
@@ -9,14 +9,18 @@
     <depends>NodeJS</depends>
 
     <description><![CDATA[
-        <p>Integrates <b>Stryker</b> under the common Intellij test framework.</p>
-        <h4>Features</h4>
+        <p>Integrates <b>StrykerJS</b> under the common Intellij test framework.</p>
+        <p>This plugin does not support Stryker for other languages</p>
+        <p />
+        <h4><b>Features</b></h4>
         <ul>
         <li>Introduce Stryker <a href="https://www.jetbrains.com/help/idea/run-debug-configuration.html">run configuration</a> type</li>
         <li>Create a test run from a source file or spec file</li>
         </ul>
-        <h4>Project setup</h4>
-        <p>Just add <b>stryker-intellij-reporter</b> package dependency into your project:</p>
+        <p />
+        <h4><b>Project setup</b></h4>
+        <p>If have Stryker 4.0 or newer, there's no setup necessary</p>
+        <p>If your version of Stryker is older than 4.0 then add <b>stryker-intellij-reporter</b> package dependency into your project:</p>
         <pre>&emsp;<code>npm i stryker-intellij-reporter -D</code></pre>
         <p>And add it as a plugin to your stryker config:</p>
         <pre>&emsp;<code>{
@@ -25,15 +29,23 @@
          "stryker-intellij-reporter"
      ]
  }</code></pre>
+        <p />
         <p>Please report all issues to https://github.com/Garethp/intellij-stryker-run-config/issues</p>
 ]]>
     </description>
 
     <change-notes><![CDATA[
         <p>
-        <b>1.0.7</b>
+        <b>1.0.8</b>
+        <p>SmartTerminalCommands now support <code>yarn [script]</code> where the <code>[script]</code> definition starts with <code>stryker run</code> (for example <code>yarn test:mutation</code>)!</p>
         <ul>
-        <li>Improve support for Stryker in workspaces, including different versions in different workspaces</li>
+        <li>Improved the accuracy of mutants when the user changes the file before navigating to the mutant results</li>
+        <li>Expanded smart terminal commands to work with the following:
+            <ul>
+                <li><code><pre>yarn stryker run</pre></code></li>
+                <li><code><pre>yarn [script]</pre></code></li>
+            </ul>
+        </li>
         </ul>
         </p>
     ]]>

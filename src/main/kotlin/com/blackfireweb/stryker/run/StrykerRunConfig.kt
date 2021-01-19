@@ -5,8 +5,6 @@ import com.intellij.execution.*
 import com.intellij.execution.configuration.EnvironmentVariablesComponent
 import com.intellij.execution.configurations.*
 import com.intellij.execution.runners.ExecutionEnvironment
-import com.intellij.ide.plugins.PluginManagerConfigurable
-import com.intellij.ide.plugins.newui.PluginsTab
 import com.intellij.javascript.nodejs.NodeModuleDirectorySearchProcessor
 import com.intellij.javascript.nodejs.NodeModuleSearchUtil
 import com.intellij.javascript.nodejs.interpreter.NodeInterpreterUtil
@@ -22,12 +20,8 @@ import com.intellij.lang.javascript.psi.JSFile
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.options.SettingsEditorGroup
-import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
-import com.intellij.openapi.ui.MessageType
-import com.intellij.openapi.ui.popup.Balloon
-import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.io.FileUtil
@@ -35,20 +29,18 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.wm.WindowManager
-import com.intellij.ui.awt.RelativePoint
+import com.intellij.util.text.SemVer
 import com.intellij.util.xmlb.XmlSerializer
 import com.intellij.xdebugger.XDebugProcess
 import com.intellij.xdebugger.XDebugSession
 import org.jdom.Element
+import org.jetbrains.annotations.Nullable
 import org.jetbrains.debugger.DebuggableRunConfiguration
 import org.jetbrains.io.LocalFileFinder
-import java.awt.Point
 import java.io.File
 import java.net.InetSocketAddress
 import java.net.URL
 import java.util.*
-import javax.swing.event.HyperlinkEvent
 
 class StrykerRunConfig(project: Project, factory: ConfigurationFactory) : LocatableConfigurationBase<StrykerConfigurationType>(project, factory, ""), CommonProgramRunConfigurationParameters, DebuggableRunConfiguration {
 
@@ -56,9 +48,8 @@ class StrykerRunConfig(project: Project, factory: ConfigurationFactory) : Locata
 
     private var myRunSettings: StrykerRunSettings = StrykerRunSettings()
 
-    override fun getState(executor: Executor, env: ExecutionEnvironment): RunProfileState? {
-        val state = StrykerRunState(env, this)
-        return state
+    override fun getState(executor: Executor, env: ExecutionEnvironment): RunProfileState {
+        return StrykerRunState(env, this)
     }
 
     override fun createDebugProcess(socketAddress: InetSocketAddress, session: XDebugSession, executionResult: ExecutionResult?, environment: ExecutionEnvironment): XDebugProcess {
@@ -130,6 +121,42 @@ class StrykerRunConfig(project: Project, factory: ConfigurationFactory) : Locata
             return NodePackage(info.moduleSourceRoot.path)
         }
         return null
+    }
+
+    fun hasReporter(interpreter: NodeJsInterpreter): Boolean {
+        val version = getStrykerVersion(interpreter)
+        if (version != null && version.major >= 4) return true
+
+        return getStrykerIntelliJReporterFile() !== null
+    }
+
+    private fun getStrykerVersion(
+        interpreter: NodeJsInterpreter
+    ): @Nullable SemVer? {
+        if (workingDirectory == null) return null
+
+        val packageToUse = workingDirectory.takeIf { it!!.isNotEmpty() }
+            ?.let { directory ->
+                VfsUtil.findFileByURL(
+                    URL(
+                        if (workingDirectory!!.isNotEmpty()) {
+                            "file://${directory}/src"
+                        } else {
+                            ""
+                        }
+                    )
+                )
+            }
+            ?.let { virtualFile ->
+                NodeModuleSearchUtil.resolveModuleFromNodeModulesDir(
+                    virtualFile,
+                    "@stryker-mutator/core",
+                    NodeModuleDirectorySearchProcessor.PROCESSOR
+                )
+            }
+            ?.let { resolvedInfo -> NodePackage(resolvedInfo.moduleSourceRoot.path) }
+            ?: NodePackage.findDefaultPackage(project, "@stryker-mutator/core", interpreter)
+        return packageToUse?.version
     }
 
     private fun getContextFile(): VirtualFile? {

@@ -94,7 +94,7 @@ class StrykerCustomCommandHandler : TerminalShellCommandHandler {
         val validCommands = getValidCommandsForPackageJSON(project, workingDirectory)
 
         val triggers = arrayOf("yarn stryker run", "stryker run", "npx stryker run")
-            .plus(validCommands.map { "npm run $it" })
+            .plus(validCommands.map { "yarn $it" })
 
         if (workingDirectory === null) return false
         if (!triggers.any { command.startsWith(it) }) return false
@@ -104,7 +104,7 @@ class StrykerCustomCommandHandler : TerminalShellCommandHandler {
 
     private fun getValidCommandsForPackageJSON(project: Project, workingDirectory: String?): List<String> {
         if (workingDirectory == null) return emptyList()
-        if (validCommands.containsKey(workingDirectory)) {
+        if (validCommands.containsKey(workingDirectory) && validCommands[workingDirectory]!!.isNotEmpty()) {
             return validCommands[workingDirectory]!!
         }
 
@@ -113,7 +113,7 @@ class StrykerCustomCommandHandler : TerminalShellCommandHandler {
 
         val scripts = NpmScriptsUtil.listTasks(project, packageJSONFile).scripts.filter {
             val command = NpmScriptsUtil.findScriptProperty(project, packageJSONFile, it.name)!!.value!!.text
-            command.startsWith("stryker run")
+            command.removePrefix("\"").startsWith("stryker run")
         }
 
         validCommands[workingDirectory] = scripts.map { it.name }

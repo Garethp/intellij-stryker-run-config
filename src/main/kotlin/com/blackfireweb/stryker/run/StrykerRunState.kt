@@ -1,5 +1,6 @@
 package com.blackfireweb.stryker.run
 
+import com.blackfireweb.stryker.licencing.LicencingManager
 import com.intellij.execution.DefaultExecutionResult
 import com.intellij.execution.ExecutionResult
 import com.intellij.execution.Executor
@@ -41,16 +42,33 @@ import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.util.*
 
-class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRunConfiguration: StrykerRunConfig) : RunProfileState {
+class StrykerRunState(
+    private val myEnv: ExecutionEnvironment,
+    private val myRunConfiguration: StrykerRunConfig,
+    private val filesToRun: List<String>? = emptyList()
+) : RunProfileState {
     override fun execute(executor: Executor, runner: ProgramRunner<*>): ExecutionResult? {
         try {
-            val interpreter: NodeJsInterpreter = NodeJsInterpreterRef.create(this.myRunConfiguration.getPersistentData().nodeJsRef).resolveNotNull(myEnv.project)
+            val licencingManager = LicencingManager()
+            if (filesToRun?.isNotEmpty() == true && !licencingManager.requestLicence()) return null
+
+            val interpreter: NodeJsInterpreter =
+                NodeJsInterpreterRef.create(this.myRunConfiguration.getPersistentData().nodeJsRef)
+                    .resolveNotNull(myEnv.project)
             val commandLine = NodeCommandLineUtil.createCommandLine(if (SystemInfo.isWindows) false else null)
             val reporterExists = myRunConfiguration.hasReporter(interpreter)
             this.configureCommandLine(commandLine, interpreter, reporterExists)
             val processHandler = NodeCommandLineUtil.createProcessHandler(commandLine, false)
-            val consoleProperties = StrykerConsoleProperties(this.myRunConfiguration, this.myEnv.executor, StrykerTestLocationProvider(), NodeCommandLineUtil.shouldUseTerminalConsole(processHandler))
-            val consoleView: ConsoleView = if (reporterExists) this.createSMTRunnerConsoleView(commandLine.workDirectory, consoleProperties) else ConsoleViewImpl(myProject, false)
+            val consoleProperties = StrykerConsoleProperties(
+                this.myRunConfiguration,
+                this.myEnv.executor,
+                StrykerTestLocationProvider(),
+                NodeCommandLineUtil.shouldUseTerminalConsole(processHandler)
+            )
+            val consoleView: ConsoleView = if (reporterExists) this.createSMTRunnerConsoleView(
+                commandLine.workDirectory,
+                consoleProperties
+            ) else ConsoleViewImpl(myProject, false)
 
             /**
              * Unlike normal test frameworks, we don't have an easily searchable "anchor element" that refers to a test,
@@ -82,7 +100,12 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
 
             consoleView.attachToProcess(processHandler)
             val executionResult = DefaultExecutionResult(consoleView, processHandler)
-            executionResult.setRestartActions(StrykerRerunFailedTestAction(consoleView as SMTRunnerConsoleView, consoleProperties))
+            executionResult.setRestartActions(
+                StrykerRerunFailedTestAction(
+                    consoleView as SMTRunnerConsoleView,
+                    consoleProperties
+                )
+            )
             return executionResult
         } catch (e: Exception) {
             logger<StrykerRunState>().error("Failed to run Stryker configuration", e)
@@ -93,8 +116,12 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
 
     private val myProject = myEnv.project
 
-    private fun createSMTRunnerConsoleView(workingDirectory: File?, consoleProperties: StrykerConsoleProperties): ConsoleView {
-        val consoleView: ConsoleView = SMTestRunnerConnectionUtil.createConsole(consoleProperties.testFrameworkName, consoleProperties)
+    private fun createSMTRunnerConsoleView(
+        workingDirectory: File?,
+        consoleProperties: StrykerConsoleProperties
+    ): ConsoleView {
+        val consoleView: ConsoleView =
+            SMTestRunnerConnectionUtil.createConsole(consoleProperties.testFrameworkName, consoleProperties)
         consoleProperties.addStackTraceFilter(NodeStackTraceFilter(this.myProject, workingDirectory))
         consoleProperties.stackTrackFilters.forEach { consoleView.addMessageFilter(it) }
         consoleView.addMessageFilter(NodeConsoleAdditionalFilter(this.myProject, workingDirectory))
@@ -102,7 +129,11 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
         return consoleView
     }
 
-    private fun configureCommandLine(commandLine: GeneralCommandLine, interpreter: NodeJsInterpreter, hasReporter: Boolean) {
+    private fun configureCommandLine(
+        commandLine: GeneralCommandLine,
+        interpreter: NodeJsInterpreter,
+        hasReporter: Boolean
+    ) {
         commandLine.charset = StandardCharsets.UTF_8
         val data = this.myRunConfiguration.getPersistentData()
 
@@ -115,31 +146,36 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
             val thisModule = it
             ModuleRootManager.getInstance(it).contentRoots.forEach {
                 ModuleRootModificationUtil.updateExcludedFolders(
-                        thisModule,
-                        it,
-                        Collections.emptyList(),
-                        Collections.singletonList(if (!workingDirectory.isBlank()) "file://${workingDirectory}/.stryker-tmp" else "${it.url}/.stryker-tmp"))
+                    thisModule,
+                    it,
+                    Collections.emptyList(),
+                    Collections.singletonList(if (!workingDirectory.isBlank()) "file://${workingDirectory}/.stryker-tmp" else "${it.url}/.stryker-tmp")
+                )
             }
         }
 
         NodeCommandLineUtil.configureUsefulEnvironment(commandLine)
-        val startCmd = "run"
         data.npmRef
-                .takeIf { it?.isNotEmpty() ?: false }
-                ?.let { NpmUtil.resolveRef(NodePackageRef.create(it), myProject, interpreter) }
-                ?.let { pkg ->
-                    val yarn = NpmUtil.isYarnAlikePackage(pkg)
-                    val validNpmCliJsFilePath = NpmUtil.getValidNpmCliJsFilePath(pkg)
-                    if (yarn) {
-                        commandLine.withParameters(validNpmCliJsFilePath, "run")
-                    } else {
-                        commandLine.withParameters(validNpmCliJsFilePath.replace("npm-cli", "npx-cli"))
-                    }
-                    commandLine.addParameter("stryker")
+            .takeIf { it?.isNotEmpty() ?: false }
+            ?.let { NpmUtil.resolveRef(NodePackageRef.create(it), myProject, interpreter) }
+            ?.let { pkg ->
+                val validNpmCliJsFilePath = NpmUtil.getValidNpmCliJsFilePath(pkg)
+                if (NpmUtil.isYarnAlikePackage(pkg)) {
+                    commandLine.withParameters(validNpmCliJsFilePath, "run")
+                } else {
+                    commandLine.withParameters(validNpmCliJsFilePath.replace("npm-cli", "npx-cli"))
                 }
-                ?: commandLine.withParameters(NodePackage.findDefaultPackage(myProject, "stryker", interpreter)!!.systemDependentPath + "/bin/stryker")
+                commandLine.addParameter("stryker")
+            }
+            ?: commandLine.withParameters(
+                NodePackage.findDefaultPackage(
+                    myProject,
+                    "stryker",
+                    interpreter
+                )!!.systemDependentPath + "/bin/stryker"
+            )
 
-        commandLine.addParameter(startCmd)
+        commandLine.addParameter("run")
         if (data.additionalParams.isNotBlank()) {
             val params = data.additionalParams.trim().split("\\s+".toRegex()).toMutableList()
             commandLine.withParameters(params)
@@ -155,7 +191,7 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
             val resourceName = when {
                 version.major == 4 && version.minor == 1 -> "/Progress-4.1.js"
                 version.major == 4 && version.major == 0 -> "/Progress-4.0.js"
-                else -> "/Progress-4.0.js"
+                else -> "/Progress-4.1.js"
             }
 
             val resource = this.javaClass.getResourceAsStream(resourceName)
@@ -167,20 +203,28 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
             commandLine.addParameter(tempReporterFile.absolutePath)
 
             commandLine.addParameter("--reporters")
-            commandLine.addParameter("intellij")
+            commandLine.addParameter("intellij,html")
         } else {
             hasReporter.let {
                 commandLine.addParameter("--reporters")
-                commandLine.addParameter("intellij")
+                commandLine.addParameter("intellij,html")
             }
         }
-        if ((data.kind == StrykerRunConfig.TestKind.TEST || data.kind == StrykerRunConfig.TestKind.SPEC) && !isConfigFile(data.specFile
-                        ?: "")) {
-            addMutateOrDie(commandLine, data)
-        }
 
-        if (data.kind == StrykerRunConfig.TestKind.DIRECTORY) {
-            addMutateDirectoryOrDie(commandLine, data)
+        if (filesToRun.isNullOrEmpty()) {
+            if ((data.kind == StrykerRunConfig.TestKind.TEST || data.kind == StrykerRunConfig.TestKind.SPEC) && !isConfigFile(
+                    data.specFile
+                        ?: ""
+                )
+            ) {
+                addMutateOrDie(commandLine, data)
+            }
+
+            if (data.kind == StrykerRunConfig.TestKind.DIRECTORY) {
+                addMutateDirectoryOrDie(commandLine, data)
+            }
+        } else {
+            addMutateOrDie(commandLine, filesToRun.map { "$workingDirectory/$it" })
         }
 
         NodeCommandLineConfigurator.find(interpreter).configure(commandLine)
@@ -216,18 +260,40 @@ class StrykerRunState(private val myEnv: ExecutionEnvironment, private val myRun
 
     private fun addMutateOrDie(commandLine: GeneralCommandLine, data: StrykerRunConfig.StrykerRunSettings) {
         val file = data.specFile ?: return
-        val virtualFile = LocalFileSystem.getInstance().findFileByIoFile(File(file)) ?: return
-        val extension = virtualFile.extension
+        addMutateOrDie(commandLine, listOf(file))
+    }
+
+    private fun addMutateOrDie(commandLine: GeneralCommandLine, files: List<String>) {
+        val filesNeeded = files.map {
+            val virtualFile = LocalFileSystem.getInstance().findFileByIoFile(File(it)) ?: return
+            val extension = virtualFile.extension
+
+            if (".spec.$extension\$".toRegex().containsMatchIn(it)) it.replace(
+                ".spec.$extension",
+                ".$extension"
+            ) else it
+        }
 
         commandLine.addParameter("--mutate")
-        commandLine.addParameter(if (".spec.$extension\$".toRegex().containsMatchIn(file)) file.replace(".spec.$extension", ".$extension") else file)
+        commandLine.addParameter(filesNeeded.joinToString(","))
 
     }
 
     private fun addMutateDirectoryOrDie(commandLine: GeneralCommandLine, data: StrykerRunConfig.StrykerRunSettings) {
         val directory = data.specsDir ?: return
 
+        val supportedExtensions = listOf<String>("[tj]s", "[tj]sx")
+        val extensionNotToMutate = listOf<String>()
+            .plus(supportedExtensions.map { "test.$it" })
+            .plus(supportedExtensions.map { "spec.$it" })
+
         commandLine.addParameter("--mutate")
-        commandLine.addParameter("${directory}/**/*.ts,js,tsx,jsx,!${directory}/**/*.spec.ts,spec.js,spec.tsx,spec.jsx,!${directory}/**/*.test.ts,test.js,test.tsx,test.jsx")
+        commandLine.addParameter(
+            "${supportedExtensions.joinToString(",") { "$directory/**/*.$it" }},${
+                extensionNotToMutate.joinToString(
+                    ","
+                ) { "!$directory/**/*.$it" }
+            }"
+        )
     }
 }

@@ -267,7 +267,7 @@ class StrykerRunConfig(project: Project, factory: ConfigurationFactory) : Locata
             throw RuntimeConfigurationError("Spec directory must be defined")
         }
         if (project.getUserData(reporterFound) != true) {
-            if (getStrykerIntelliJReporterFile() == null) {
+            if ((interpreter === null || !hasReporter(interpreter))) {
                 val context = getContextFile()
                 val fix = interpreter?.let { interpreter ->
                     context?.let { c ->
@@ -320,15 +320,19 @@ class StrykerRunConfig(project: Project, factory: ConfigurationFactory) : Locata
     }
 }
 
-fun findFileUpwards(specName: VirtualFile, fileName: String): VirtualFile? {
+fun findFileUpwards(specName: VirtualFile, fileNames: List<String>): VirtualFile? {
     var cur = specName.parent
     while (cur != null) {
-        if (cur.children.find {name -> name.name == fileName } != null) {
+        if (cur.children.find {name -> fileNames.contains(name.name) } != null) {
             return cur
         }
         cur = cur.parent
     }
     return null
+}
+
+fun findFileUpwards(specName: VirtualFile, fileName: String): VirtualFile? {
+    return findFileUpwards(specName, listOf(fileName))
 }
 
 fun findTestByRange(containingFile: JSFile, textRange: TextRange) =

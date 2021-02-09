@@ -1,5 +1,12 @@
 ## Changelog
 
+### Version 1.0.9
+ * Outputs an HTML report when you run
+ * Fixed some instances of smart commands not working
+ * Fix the report to show you the mutants before they start running
+ * Fix the inspector not changing when the file changes
+ * Fix the "Run all files in directory" not detecting all file types
+
 #### Version 1.0.8
  * Improved the accuracy of mutants when the user changes the file before navigating to the mutant results
  * Expanded smart terminal commands to work with the following

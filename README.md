@@ -1,5 +1,8 @@
 ## IntelliJ Stryker Plugin
-Integrates Stryker-JS with the intellij test runner to give you native test runner for Mutation Testing
+Integrates Stryker-JS with the intellij test runner to give you native test runner for Mutation Testing. If you want to
+build the plugin yourself and get access to paid features without actually paying, go into 
+`com.blackfireweb.stryker.licencing` and `requiresPurchase` to `false`. The resulting build will unlock all paid features.
+That being said, if you find this plugin saves you time, please consider buying the licence.
 
 ### Build
 ```bash

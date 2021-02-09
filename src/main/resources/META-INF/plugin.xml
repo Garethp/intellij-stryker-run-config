@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.blackfireweb.stryker</id>
     <name>Stryker</name>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
     <vendor email="blackfireweb@gmail.com" url="https://github.com/Garethp">Garethp</vendor>
 
     <depends>com.intellij.modules.lang</depends>
@@ -36,16 +36,13 @@
 
     <change-notes><![CDATA[
         <p>
-        <b>1.0.8</b>
-        <p>SmartTerminalCommands now support <code>yarn [script]</code> where the <code>[script]</code> definition starts with <code>stryker run</code> (for example <code>yarn test:mutation</code>)!</p>
+        <b>1.0.9</b>
         <ul>
-        <li>Improved the accuracy of mutants when the user changes the file before navigating to the mutant results</li>
-        <li>Expanded smart terminal commands to work with the following:
-            <ul>
-                <li><code><pre>yarn stryker run</pre></code></li>
-                <li><code><pre>yarn [script]</pre></code></li>
-            </ul>
-        </li>
+        <li>Outputs an HTML report when you run</li>
+        <li>Fixed some instances of smart commands not working</li>
+        <li>Fix the report to show you the mutants before they start running</li>
+        <li>Fix the inspector not changing when the file changes</li>
+        <li>Fix the "Run all files in directory" not detecting all file types</li>
         </ul>
         </p>
     ]]>
@@ -66,7 +63,7 @@
         <localInspection groupPath="Javascript" language="JavaScript" shortName="MutantSurvived" enabledByDefault="true"
                          level="ERROR" groupBundle="messages.InspectionsBundle"
                          groupName="Stryker"
-                         implementationClass="com.blackfireweb.stryker.run.MutationSurvivedInspection" displayName="Mutations survived"/>
+                         implementationClass="com.blackfireweb.stryker.inspections.MutationSurvivedInspection" displayName="Mutations survived"/>
         <terminal.shellCommandHandler implementation="com.blackfireweb.stryker.run.StrykerCustomCommandHandler" />
     </extensions>
 

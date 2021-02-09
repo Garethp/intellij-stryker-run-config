@@ -3,6 +3,7 @@ package com.blackfireweb.stryker.run
 import com.intellij.execution.actions.ConfigurationContext
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.javascript.testing.JsTestRunConfigurationProducer
+import com.intellij.json.psi.JsonFile
 import com.intellij.lang.javascript.psi.JSFile
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiDirectory
@@ -11,19 +12,26 @@ import com.intellij.psi.util.PsiUtilCore
 import com.intellij.util.text.nullize
 import kotlin.reflect.KProperty1
 
-const val strykerConfigFile = "stryker.conf.js"
-
 class StrykerRunConfigProducer : JsTestRunConfigurationProducer<StrykerRunConfig>(listOf("stryker")) {
-    override fun isConfigurationFromCompatibleContext(configuration: StrykerRunConfig, context: ConfigurationContext): Boolean {
+    private val strykerConfigFile = listOf("stryker.conf.js", "stryker.conf.ts", "stryker.conf.json")
+
+    override fun isConfigurationFromCompatibleContext(
+        configuration: StrykerRunConfig,
+        context: ConfigurationContext
+    ): Boolean {
         val psiElement = context.psiLocation ?: return false
-        val projectRoot = findFileUpwards((psiElement as? PsiDirectory)?.virtualFile
+        val projectRoot = findFileUpwards(
+            (psiElement as? PsiDirectory)?.virtualFile
                 ?: psiElement.containingFile?.virtualFile
-                ?: return false, strykerConfigFile) ?: return false
+                ?: return false, strykerConfigFile
+        ) ?: return false
         val thatData = configuration.getPersistentData()
-        val thisData = createTestElementRunInfo(psiElement, StrykerRunConfig.StrykerRunSettings(), projectRoot.path)?.mySettings
+        val thisData =
+            createTestElementRunInfo(psiElement, StrykerRunConfig.StrykerRunSettings(), projectRoot.path)?.mySettings
                 ?: return false
         if (thatData.kind != thisData.kind) return false
-        val compare: (KProperty1<StrykerRunConfig.StrykerRunSettings, String?>) -> Boolean = { it.get(thatData).nullize(true) == it.get(thisData).nullize(true) }
+        val compare: (KProperty1<StrykerRunConfig.StrykerRunSettings, String?>) -> Boolean =
+            { it.get(thatData).nullize(true) == it.get(thisData).nullize(true) }
         return when (thatData.kind) {
             StrykerRunConfig.TestKind.DIRECTORY -> compare(StrykerRunConfig.StrykerRunSettings::specsDir)
             StrykerRunConfig.TestKind.SPEC -> compare(StrykerRunConfig.StrykerRunSettings::specFile)
@@ -31,10 +39,16 @@ class StrykerRunConfigProducer : JsTestRunConfigurationProducer<StrykerRunConfig
         }
     }
 
-    private fun createTestElementRunInfo(element: PsiElement, templateRunSettings: StrykerRunConfig.StrykerRunSettings, projectRoot: String): StrykerTestElementInfo? {
+    private fun createTestElementRunInfo(
+        element: PsiElement,
+        templateRunSettings: StrykerRunConfig.StrykerRunSettings,
+        projectRoot: String
+    ): StrykerTestElementInfo? {
         val virtualFile = PsiUtilCore.getVirtualFile(element) ?: return null
         templateRunSettings.setWorkingDirectory(projectRoot)
-        val containingFile = element.containingFile as? JSFile ?: return if (virtualFile.isDirectory) {
+        val containingFile = element.containingFile
+        val isValidFile = containingFile is JSFile || (containingFile is JsonFile && strykerConfigFile.contains(containingFile.name))
+        if (!isValidFile) return if (virtualFile.isDirectory) {
             templateRunSettings.kind = StrykerRunConfig.TestKind.DIRECTORY
             templateRunSettings.specsDir = virtualFile.canonicalPath
             return StrykerTestElementInfo(templateRunSettings, null)
@@ -42,29 +56,40 @@ class StrykerRunConfigProducer : JsTestRunConfigurationProducer<StrykerRunConfig
 
         val textRange = element.textRange ?: return null
 
-        val path = findTestByRange(containingFile, textRange)
+        val path = if (containingFile is JSFile) findTestByRange(containingFile, textRange) else null
         if (path == null) {
             templateRunSettings.kind = StrykerRunConfig.TestKind.SPEC
             templateRunSettings.specFile = containingFile.virtualFile.canonicalPath
             return StrykerTestElementInfo(templateRunSettings, containingFile)
         }
         templateRunSettings.specFile = virtualFile.path
-        templateRunSettings.kind = if (path.testName != null || path.suiteNames.isNotEmpty() ) StrykerRunConfig.TestKind.TEST else StrykerRunConfig.TestKind.SPEC
+        templateRunSettings.kind =
+            if (path.testName != null || path.suiteNames.isNotEmpty()) StrykerRunConfig.TestKind.TEST else StrykerRunConfig.TestKind.SPEC
         templateRunSettings.allNames = path.allNames
         if (templateRunSettings.kind == StrykerRunConfig.TestKind.TEST) {
-            return null;
+            return null
         }
         return StrykerTestElementInfo(templateRunSettings, path.testElement)
     }
 
-    class StrykerTestElementInfo(val mySettings: StrykerRunConfig.StrykerRunSettings, val myEnclosingElement: PsiElement?)
+    class StrykerTestElementInfo(
+        val mySettings: StrykerRunConfig.StrykerRunSettings,
+        val myEnclosingElement: PsiElement?
+    )
 
-    override fun setupConfigurationFromCompatibleContext(configuration: StrykerRunConfig, context: ConfigurationContext, sourceElement: Ref<PsiElement>): Boolean {
+    override fun setupConfigurationFromCompatibleContext(
+        configuration: StrykerRunConfig,
+        context: ConfigurationContext,
+        sourceElement: Ref<PsiElement>
+    ): Boolean {
         val psiElement = context.psiLocation ?: return false
-        val projectRoot = findFileUpwards((psiElement as? PsiDirectory)?.virtualFile
+        val projectRoot = findFileUpwards(
+            (psiElement as? PsiDirectory)?.virtualFile
                 ?: psiElement.containingFile?.virtualFile
-                ?: return false, strykerConfigFile) ?: return false
-        val runInfo = createTestElementRunInfo(psiElement, configuration.getPersistentData(), projectRoot.path) ?: return false
+                ?: return false, strykerConfigFile
+        ) ?: return false
+        val runInfo =
+            createTestElementRunInfo(psiElement, configuration.getPersistentData(), projectRoot.path) ?: return false
         configuration.setGeneratedName()
         runInfo.myEnclosingElement?.let { sourceElement.set(it) }
         return true

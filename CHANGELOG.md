@@ -1,5 +1,8 @@
 ## Changelog
 
+### Version 1.0.10
+ * Fix a regression where inspections weren't appearing
+
 ### Version 1.0.9
  * Outputs an HTML report when you run
  * Fixed some instances of smart commands not working

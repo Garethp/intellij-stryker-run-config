@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.blackfireweb.stryker</id>
     <name>Stryker</name>
-    <version>1.0.9</version>
+    <version>1.0.10</version>
     <vendor email="blackfireweb@gmail.com" url="https://github.com/Garethp">Garethp</vendor>
 
     <depends>com.intellij.modules.lang</depends>
@@ -36,13 +36,9 @@
 
     <change-notes><![CDATA[
         <p>
-        <b>1.0.9</b>
+        <b>1.0.10</b>
         <ul>
-        <li>Outputs an HTML report when you run</li>
-        <li>Fixed some instances of smart commands not working</li>
-        <li>Fix the report to show you the mutants before they start running</li>
-        <li>Fix the inspector not changing when the file changes</li>
-        <li>Fix the "Run all files in directory" not detecting all file types</li>
+        <li>Fix a regression where inspections weren't appearing</li>
         </ul>
         </p>
     ]]>

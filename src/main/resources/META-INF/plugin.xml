@@ -3,6 +3,7 @@
     <name>Stryker</name>
     <version>1.0.11</version>
     <vendor email="blackfireweb@gmail.com" url="https://github.com/Garethp">Garethp</vendor>
+<!--    <product-descriptor code="PSTRKER" release-date="20210209" release-version="2021" optional="true" />-->
 
     <depends>com.intellij.modules.lang</depends>
     <depends>JavaScript</depends>

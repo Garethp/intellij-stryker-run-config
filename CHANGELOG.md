@@ -1,5 +1,8 @@
 ## Changelog
 
+### Version 1.0.11
+ * Fix an error with reading `package.json` in a non-async context
+
 ### Version 1.0.10
  * Fix a regression where inspections weren't appearing
 

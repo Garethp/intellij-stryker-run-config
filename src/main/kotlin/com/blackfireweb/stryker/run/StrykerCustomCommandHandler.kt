@@ -11,6 +11,7 @@ import com.intellij.lang.javascript.buildTools.npm.NpmScriptsService
 import com.intellij.lang.javascript.buildTools.npm.NpmScriptsUtil
 import com.intellij.lang.javascript.buildTools.npm.NpmTaskTreeView
 import com.intellij.openapi.application.ApplicationInfo
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.terminal.TerminalShellCommandHandler
@@ -111,13 +112,16 @@ class StrykerCustomCommandHandler : TerminalShellCommandHandler {
         val packageJSONFile = LocalFileSystem.getInstance().findFileByPath("$workingDirectory/package.json")
             ?: return emptyList()
 
-        val scripts = NpmScriptsUtil.listTasks(project, packageJSONFile).scripts.filter {
-            val command = NpmScriptsUtil.findScriptProperty(project, packageJSONFile, it.name)!!.value!!.text
-            command.removePrefix("\"").startsWith("stryker run")
+        ApplicationManager.getApplication().invokeLater {
+            val scripts = NpmScriptsUtil.listTasks(project, packageJSONFile).scripts.filter {
+                val command = NpmScriptsUtil.findScriptProperty(project, packageJSONFile, it.name)!!.value!!.text
+                command.removePrefix("\"").startsWith("stryker run")
+            }
+
+            validCommands[workingDirectory] = scripts.map { it.name }
         }
 
-        validCommands[workingDirectory] = scripts.map { it.name }
-        return validCommands[workingDirectory]!!
+        return emptyList()
     }
 
     private fun getCommandForScript(project: Project, workingDirectory: String, script: String): List<String> {

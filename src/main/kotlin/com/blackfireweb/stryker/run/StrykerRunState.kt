@@ -10,6 +10,7 @@ import com.intellij.execution.configurations.RunProfileState
 import com.intellij.execution.impl.ConsoleViewImpl
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
+import com.intellij.execution.testframework.AbstractTestProxy
 import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsAdapter
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
@@ -33,7 +34,9 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.refactoring.suggested.startOffset
 import com.intellij.util.messages.MessageBusConnection
 import com.intellij.util.text.SemVer
 import org.jetbrains.annotations.Nullable
@@ -45,12 +48,12 @@ import java.util.*
 class StrykerRunState(
     private val myEnv: ExecutionEnvironment,
     private val myRunConfiguration: StrykerRunConfig,
-    private val filesToRun: List<String>? = emptyList()
+    private val testsToReRun: List<AbstractTestProxy>? = emptyList()
 ) : RunProfileState {
     override fun execute(executor: Executor, runner: ProgramRunner<*>): ExecutionResult? {
         try {
             val licencingManager = LicencingManager()
-            if (filesToRun?.isNotEmpty() == true && !licencingManager.requestLicence()) return null
+            if (testsToReRun?.isNotEmpty() == true && !licencingManager.requestLicence()) return null
 
             val interpreter: NodeJsInterpreter =
                 NodeJsInterpreterRef.create(this.myRunConfiguration.getPersistentData().nodeJsRef)
@@ -211,7 +214,7 @@ class StrykerRunState(
             }
         }
 
-        if (filesToRun.isNullOrEmpty()) {
+        if (testsToReRun.isNullOrEmpty()) {
             if ((data.kind == StrykerRunConfig.TestKind.TEST || data.kind == StrykerRunConfig.TestKind.SPEC) && !isConfigFile(
                     data.specFile
                         ?: ""
@@ -224,7 +227,47 @@ class StrykerRunState(
                 addMutateDirectoryOrDie(commandLine, data)
             }
         } else {
-            addMutateOrDie(commandLine, filesToRun.map { "$workingDirectory/$it" })
+            when {
+                version.major > 5 || (version.major == 4 && version.minor >= 6) -> {
+                    val mutantLocations = testsToReRun.filter {
+                        val location = ((it as SMTestProxy).locator).getLocation(
+                            MUTANT_PROTOCOL,
+                            it.locationUrl.toString(),
+                            it.metainfo,
+                            myProject,
+                            GlobalSearchScope.EMPTY_SCOPE
+                        )
+
+                        location[0].psiElement.isValid && location[1].psiElement.isValid
+                    }
+                        .map {
+                            val location = ((it as SMTestProxy).locator).getLocation(
+                                MUTANT_PROTOCOL,
+                                it.locationUrl.toString(),
+                                it.metainfo,
+                                myProject,
+                                GlobalSearchScope.EMPTY_SCOPE
+                            )
+                            val document =
+                                PsiDocumentManager.getInstance(myProject)
+                                    .getDocument(location[0].psiElement.containingFile)
+                            val startLine = document!!.getLineNumber(location[0].psiElement.textOffset)
+                            val endLine = document!!.getLineNumber(location[1].psiElement.textOffset)
+
+                            val startColumn =
+                                location[0].psiElement.startOffset - document!!.getLineStartOffset(startLine)
+                            val endColumn = location[1].psiElement.startOffset - document!!.getLineStartOffset(endLine)
+                            "${it.name}:${startLine + 1}:${startColumn}-${endLine + 1}:${endColumn + 1}"
+                        }
+
+                    commandLine.addParameter("--mutate")
+                    commandLine.addParameter(mutantLocations.joinToString(","))
+                }
+                else -> {
+                    addMutateOrDie(commandLine, testsToReRun.map { it.name }.distinct().map { "$workingDirectory/$it" })
+                }
+            }
+
         }
 
         NodeCommandLineConfigurator.find(interpreter).configure(commandLine)
@@ -276,7 +319,6 @@ class StrykerRunState(
 
         commandLine.addParameter("--mutate")
         commandLine.addParameter(filesNeeded.joinToString(","))
-
     }
 
     private fun addMutateDirectoryOrDie(commandLine: GeneralCommandLine, data: StrykerRunConfig.StrykerRunSettings) {

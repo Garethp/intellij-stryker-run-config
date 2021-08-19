@@ -11,14 +11,17 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.containers.ContainerUtil
 
 class StrykerTestLocationProvider : SMTestLocator {
-    private val locations = HashMap<String, Location<*>>()
+    private val locations = HashMap<String, Pair<Location<*>, Location<*>>>()
 
     override fun getLocation(protocol: String, path: String, metaInfo: String?, project: Project, scope: GlobalSearchScope): List<Location<*>> {
         return if (MUTANT_PROTOCOL != protocol) {
             emptyList()
         } else {
             val location = this.getTestLocation(project, path.removePrefix("$MUTANT_PROTOCOL://"))
-            return ContainerUtil.createMaybeSingletonList(location)
+            if (location === null)
+                return emptyList()
+
+            return listOf(location.first, location.second)
         }
     }
 
@@ -26,15 +29,16 @@ class StrykerTestLocationProvider : SMTestLocator {
         throw IllegalStateException("Should not be called")
     }
 
-    private fun getTestLocation(project: Project, locationData: String): Location<*>? {
+    private fun getTestLocation(project: Project, locationData: String): Pair<Location<*>, Location<*>>? {
         if (locations.containsKey(locationData)) {
-            return locations[locationData]
+            return locations[locationData]!!
         }
 
-        val (fileName, start) = transformLocationData(locationData)
+        val (fileName, start, end) = transformLocationData(locationData)
 
         val fullFileName = if (fileName.indexOf(project.basePath!!) == 0) { fileName } else { project.basePath + "/" + fileName }
         val (startLine, startColumn) = start
+        val (endLine, endColumn) = end
         val virtualFile = LocalFileSystem.getInstance().findFileByPath(fullFileName)
         if (virtualFile === null) return null
 
@@ -42,9 +46,10 @@ class StrykerTestLocationProvider : SMTestLocator {
         if (file === null) return null
 
         val startOffset = PsiDocumentManager.getInstance(project).getDocument(file)?.getLineStartOffset(startLine - 1)?.plus(startColumn - 1) ?: 0
+        val endOffset = PsiDocumentManager.getInstance(project).getDocument(file)?.getLineStartOffset(endLine - 1)?.plus(endColumn - 1) ?: 0
 
-        locations[locationData] = PsiLocation.fromPsiElement(file.findElementAt(startOffset))
-        return locations[locationData]
+        locations[locationData] = Pair(PsiLocation.fromPsiElement(file.findElementAt(startOffset)), PsiLocation.fromPsiElement(file.findElementAt(endOffset)))
+        return locations[locationData]!!
     }
 
     private fun transformLocationData(locationData: String): Triple<String, Pair<Int, Int>, Pair<Int, Int>> {

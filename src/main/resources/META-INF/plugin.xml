@@ -1,9 +1,9 @@
 <idea-plugin>
     <id>com.blackfireweb.stryker</id>
     <name>Stryker</name>
-    <version>1.0.11</version>
+    <version>2021.1</version>
     <vendor email="blackfireweb@gmail.com" url="https://github.com/Garethp">Garethp</vendor>
-<!--    <product-descriptor code="PSTRKER" release-date="20210209" release-version="2021" optional="true" />-->
+    <product-descriptor code="PSTRKER" release-date="20210819" release-version="20211" optional="true"/>
 
     <depends>com.intellij.modules.lang</depends>
     <depends>JavaScript</depends>
@@ -37,9 +37,11 @@
 
     <change-notes><![CDATA[
         <p>
-        <b>1.0.11</b>
+        <b>2021.1</b>
         <ul>
-        <li>Fix an error about reading the package.json file in the wrong context</li>
+        <li>Introduced re-running failed mutants</li>
+        <li>Fix some errors that were occurring in the background</li>
+        <li>Moved to new versioning strategy to accommodate Jetbrains Marketplace</li>
         </ul>
         </p>
     ]]>
@@ -60,12 +62,16 @@
         <localInspection groupPath="Javascript" language="JavaScript" shortName="MutantSurvived" enabledByDefault="true"
                          level="ERROR" groupBundle="messages.InspectionsBundle"
                          groupName="Stryker"
-                         implementationClass="com.blackfireweb.stryker.inspections.MutationSurvivedInspection" displayName="Mutations survived"/>
-        <terminal.shellCommandHandler implementation="com.blackfireweb.stryker.run.StrykerCustomCommandHandler" />
+                         implementationClass="com.blackfireweb.stryker.inspections.MutationSurvivedInspection"
+                         displayName="Mutations survived"/>
+        <terminal.shellCommandHandler implementation="com.blackfireweb.stryker.run.StrykerCustomCommandHandler"/>
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
+        <action id="StrykerRerunFailedTests" class="com.blackfireweb.stryker.actions.RerunSomeMutantsAction"
+                icon="AllIcons.RunConfigurations.RerunFailedTests" text="Rerun These Failed Mutants">
+            <add-to-group group-id="TestTreePopupMenu" anchor="first"/>
+        </action>
     </actions>
 
 </idea-plugin>

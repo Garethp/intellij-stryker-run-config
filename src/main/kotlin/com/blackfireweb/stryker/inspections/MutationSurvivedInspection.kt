@@ -49,7 +49,9 @@ class MutationSurvivedInspection() : LocalInspectionTool(), ProjectManagerListen
             .filter { it.startsWith(stringBeginning) || it.startsWith(oldStringBeginning) }
             .filter { storage.getState(it)?.magnitude == 6 }
             .mapNotNull { locationManager.getPsiLocation(it, file, storage.getState(it)!!) }
-        return relevantResults.map { createProblemDescriptor(it, manager) }.toTypedArray()
+        return relevantResults
+            .filter { it.first.isValid && it.first.containingFile !== null && it.second.isValid && it.second.containingFile !== null }
+            .map { createProblemDescriptor(it, manager) }.toTypedArray()
     }
 
     private fun createProblemDescriptor(

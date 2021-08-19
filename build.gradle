@@ -32,7 +32,7 @@ intellij {
     pluginName 'Intellij-Stryker'
     type = 'IU'
     
-    version = 'LATEST-EAP-SNAPSHOT'
+    version = '2021.1'
     plugins = ['JavaScriptLanguage', 'NodeJS']
 
     downloadSources true
@@ -80,6 +80,10 @@ runIde {
 
 repositories {
     jcenter()
+    maven {
+        url 'https://repo.maven.apache.org/maven2'
+        name 'Maven Central'
+    }
 }
 
 dependencies {

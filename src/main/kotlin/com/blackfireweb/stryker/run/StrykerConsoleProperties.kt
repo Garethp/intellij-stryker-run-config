@@ -4,6 +4,7 @@ import com.intellij.execution.Executor
 import com.intellij.execution.testframework.TestConsoleProperties
 import com.intellij.execution.testframework.actions.AbstractRerunFailedTestsAction
 import com.intellij.execution.testframework.sm.runner.SMTestLocator
+import com.intellij.execution.testframework.sm.runner.SMTestProxy
 import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.javascript.testing.JsTestConsoleProperties
@@ -25,5 +26,9 @@ class StrykerConsoleProperties(config: StrykerRunConfig, executor: Executor, pri
 
     override fun createRerunFailedTestsAction(consoleView: ConsoleView?): AbstractRerunFailedTestsAction? {
         return StrykerRerunFailedTestAction(consoleView as SMTRunnerConsoleView, this)
+    }
+
+    fun createRerunFailedTestsAction(consoleView: ConsoleView, testsToRerun: List<SMTestProxy>): AbstractRerunFailedTestsAction {
+        return StrykerRerunFailedTestAction(consoleView as SMTRunnerConsoleView, this, testsToRerun)
     }
 }

@@ -1,5 +1,10 @@
 ## Changelog
 
+### Version 2021.1
+ * Fix some errors that were occurring in the background
+ * Introduced re-running failed mutants
+ * Moved to new versioning strategy to accommodate Jetbrains Marketplace
+
 ### Version 1.0.11
  * Fix an error with reading `package.json` in a non-async context
 

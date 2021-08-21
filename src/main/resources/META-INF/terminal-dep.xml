@@ -1,0 +1,5 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <terminal.shellCommandHandler implementation="com.blackfireweb.stryker.run.StrykerCustomCommandHandler"/>
+    </extensions>
+</idea-plugin>

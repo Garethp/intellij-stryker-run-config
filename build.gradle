@@ -33,7 +33,7 @@ intellij {
     type = 'IU'
     
     version = '2021.1'
-    plugins = ['JavaScriptLanguage', 'NodeJS']
+    plugins = ['JavaScriptLanguage', 'NodeJS', 'terminal']
 
     downloadSources true
     updateSinceUntilBuild = false

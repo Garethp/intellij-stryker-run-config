@@ -8,9 +8,10 @@
     <depends>com.intellij.modules.lang</depends>
     <depends>JavaScript</depends>
     <depends>NodeJS</depends>
+    <depends optional="true" config-file="terminal-dep.xml">org.jetbrains.plugins.terminal</depends>
 
     <description><![CDATA[
-        <p>Integrates <b>StrykerJS</b> under the common Intellij test framework.</p>
+        <p>Integrates <b>StrykerJS</b> under the common IntelliJ test framework.</p>
         <p>This plugin does not support Stryker for other languages</p>
         <p />
         <h4><b>Features</b></h4>
@@ -31,7 +32,7 @@
      ]
  }</code></pre>
         <p />
-        <p>Please report all issues to https://github.com/Garethp/intellij-stryker-run-config/issues</p>
+        <p>Please report all issues to <a href="https://github.com/Garethp/intellij-stryker-run-config/issues">the Github issues page</a></p>
 ]]>
     </description>
 
@@ -64,7 +65,6 @@
                          groupName="Stryker"
                          implementationClass="com.blackfireweb.stryker.inspections.MutationSurvivedInspection"
                          displayName="Mutations survived"/>
-        <terminal.shellCommandHandler implementation="com.blackfireweb.stryker.run.StrykerCustomCommandHandler"/>
     </extensions>
 
     <actions>

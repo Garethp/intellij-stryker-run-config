@@ -1,18 +1,17 @@
 package com.blackfireweb.stryker.inspections
 
+import com.blackfireweb.stryker.intentions.DisableMutationQuickFix
 import com.blackfireweb.stryker.run.MUTANT_PROTOCOL
 import com.intellij.codeInspection.InspectionManager
 import com.intellij.codeInspection.LocalInspectionTool
 import com.intellij.codeInspection.ProblemDescriptor
 import com.intellij.codeInspection.ProblemHighlightType
-import com.intellij.execution.PsiLocation
 import com.intellij.execution.TestStateStorage
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.project.ProjectManagerListener
-import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.util.messages.MessageBusConnection
@@ -63,7 +62,8 @@ class MutationSurvivedInspection() : LocalInspectionTool(), ProjectManagerListen
             psiLocations.second,
             "Mutant Survived",
             ProblemHighlightType.GENERIC_ERROR,
-            true
+            true,
+            DisableMutationQuickFix(locationManager)
         )
     }
 

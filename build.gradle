@@ -10,7 +10,7 @@ buildscript {
 
 
 plugins {
-    id 'org.jetbrains.intellij' version '0.6.5'
+    id 'org.jetbrains.intellij' version '1.1.4'
     id 'net.researchgate.release' version '2.6.0'
 }
 
@@ -29,13 +29,13 @@ compileKotlin {
 }
 
 intellij {
-    pluginName 'Intellij-Stryker'
+    pluginName = 'Intellij-Stryker'
     type = 'IU'
-    
-    version = '2021.1'
+
+    version = '2021.2'
     plugins = ['JavaScriptLanguage', 'NodeJS', 'terminal']
 
-    downloadSources true
+    downloadSources = true
     updateSinceUntilBuild = false
 }
 
@@ -69,7 +69,7 @@ runIde {
         def file = new File(it)
         if (file.exists() && file.isDirectory()) {
             file.eachDirMatch(~/^[0-9.]+$/) {
-                installationsFound.add([name: it.name, fullPath: it.getPath()])
+                installationsFound.add(it)
             }
 
             file.eachDirMatch(~/ch-[0-9]+$/) {
@@ -88,11 +88,11 @@ runIde {
 
     installationsFound.sort { it.name }
     installationsFound.reverse(true)
-    println(installationsFound.first().fullPath)
+    println(installationsFound.first().getPath())
 
-    ideDirectory "${installationsFound.first().fullPath}"
+    ideDir = installationsFound.first()
 
-    jvmArgs '-Xmx2G'
+//    jvmArgs = '-Xmx2G'
 }
 
 repositories {

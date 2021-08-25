@@ -1,5 +1,8 @@
 ## Changelog
 
+### Version 2021.1.1
+ * Fixed some typos in the README
+
 ### Version 2021.1
  * Fix some errors that were occurring in the background
  * Introduced re-running failed mutants

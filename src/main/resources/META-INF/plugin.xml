@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.blackfireweb.stryker</id>
     <name>Stryker</name>
-    <version>2021.1</version>
+    <version>2021.1.1</version>
     <vendor email="blackfireweb@gmail.com" url="https://github.com/Garethp">Garethp</vendor>
     <product-descriptor code="PSTRKER" release-date="20210819" release-version="20211" optional="true"/>
 

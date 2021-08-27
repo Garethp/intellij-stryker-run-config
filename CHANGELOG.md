@@ -1,5 +1,8 @@
 ## Changelog
 
+### Version 2021.1.2
+ * Support Stryker version 5
+
 ### Version 2021.1.1
  * Fixed some typos in the README
 

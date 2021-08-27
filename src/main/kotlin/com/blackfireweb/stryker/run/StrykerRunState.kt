@@ -194,6 +194,7 @@ class StrykerRunState(
             val resourceName = when {
                 version.major == 4 && version.minor == 1 -> "/Progress-4.1.js"
                 version.major == 4 && version.major == 0 -> "/Progress-4.0.js"
+                version.major == 5 -> "/Progress-5.0.js"
                 else -> "/Progress-4.1.js"
             }
 

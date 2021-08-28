@@ -61,7 +61,7 @@ class StrykerTestLocationProvider : SMTestLocator, PossiblyDumbAware {
         splitted = splitted.dropLast(1)
         val startRange = splitted.last()
         splitted = splitted.dropLast(1)
-        val fileName = splitted.joinToString("::")
+        val fileName = splitted.joinToString("::").replace("^([^/]*/)".toRegex(), "")
 
         val (startLine, startColumn) = startRange.split(":").map { it.toInt() }
         val (endLine, endColumn) = endRange.split(":").map { it.toInt() }

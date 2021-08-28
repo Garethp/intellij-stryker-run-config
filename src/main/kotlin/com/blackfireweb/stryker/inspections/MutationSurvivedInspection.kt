@@ -41,13 +41,12 @@ class MutationSurvivedInspection() : LocalInspectionTool(), ProjectManagerListen
     override fun checkFile(file: PsiFile, manager: InspectionManager, isOnTheFly: Boolean): Array<ProblemDescriptor> {
         val project = file.project
         val storage = TestStateStorage.getInstance(project)
-        val oldStringBeginning =
-            "$MUTANT_PROTOCOL://" + file.virtualFile.path.replace(project.basePath + "/", "") + "::"
-        val stringBeginning = "$MUTANT_PROTOCOL://" + file.virtualFile.path + "::"
+        val oldBeginningRegex = Regex("^$MUTANT_PROTOCOL://[^/]*/${file.virtualFile.path.replace(project.basePath + "/", "")}::.*")
+        val beginningRegex = Regex("^$MUTANT_PROTOCOL://[^/]*/${file.virtualFile.path}::.*")
         val results = storage.keys
 
         val relevantResults = results
-            .filter { it.startsWith(stringBeginning) || it.startsWith(oldStringBeginning) }
+            .filter { it.matches(oldBeginningRegex) || it.matches(beginningRegex)}
             .filter { storage.getState(it)?.magnitude == 6 }
             .mapNotNull { locationManager.getPsiLocation(it, file, storage.getState(it)!!) }
         return relevantResults

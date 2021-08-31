@@ -7,14 +7,19 @@ import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerTestTreeView
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.PlatformDataKeys
+import kotlin.reflect.full.memberFunctions
 
 class RerunSomeMutantsAction : AnAction() {
-
     private fun isTheCorrectContext(event: AnActionEvent): Boolean {
         val tree = event.getData(PlatformDataKeys.CONTEXT_COMPONENT) as? SMTRunnerTestTreeView ?: return false
-        val selectedTest = tree.selectedTest as SMTestProxy
+        val selectedTest = (tree.selectedTest as? SMTestProxy) ?: return false
+        val testRoot = selectedTest.root ?: return false
 
-        return selectedTest.root.testConsoleProperties is StrykerConsoleProperties && !selectedTest.isPassed
+        if (testRoot::class.memberFunctions.find { it.name == "getTestConsoleProperties" } == null) {
+            return false
+        }
+
+        return testRoot.testConsoleProperties is StrykerConsoleProperties && !selectedTest.isPassed
     }
 
     override fun update(event: AnActionEvent) {

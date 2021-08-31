@@ -36,7 +36,6 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.refactoring.suggested.startOffset
 import com.intellij.util.messages.MessageBusConnection
 import com.intellij.util.text.SemVer
 import org.jetbrains.annotations.Nullable
@@ -256,8 +255,8 @@ class StrykerRunState(
                             val endLine = document!!.getLineNumber(location[1].psiElement.textOffset)
 
                             val startColumn =
-                                location[0].psiElement.startOffset - document!!.getLineStartOffset(startLine)
-                            val endColumn = location[1].psiElement.startOffset - document!!.getLineStartOffset(endLine)
+                                location[0].psiElement.startOffsetInParent - document!!.getLineStartOffset(startLine)
+                            val endColumn = location[1].psiElement.startOffsetInParent - document!!.getLineStartOffset(endLine)
                             "${it.name}:${startLine + 1}:${startColumn}-${endLine + 1}:${endColumn + 1}"
                         }
 

@@ -3,6 +3,7 @@ package com.blackfireweb.stryker.run
 import com.intellij.execution.Location
 import com.intellij.execution.PsiLocation
 import com.intellij.execution.testframework.sm.runner.SMTestLocator
+import com.intellij.openapi.project.PossiblyDumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.psi.PsiDocumentManager
@@ -10,8 +11,10 @@ import com.intellij.psi.PsiManager
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.containers.ContainerUtil
 
-class StrykerTestLocationProvider : SMTestLocator {
+class StrykerTestLocationProvider : SMTestLocator, PossiblyDumbAware {
     private val locations = HashMap<String, Pair<Location<*>, Location<*>>>()
+
+    override fun isDumbAware(): Boolean = locations.isNotEmpty()
 
     override fun getLocation(protocol: String, path: String, metaInfo: String?, project: Project, scope: GlobalSearchScope): List<Location<*>> {
         return if (MUTANT_PROTOCOL != protocol) {

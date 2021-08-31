@@ -1,5 +1,9 @@
 ## Changelog
 
+### Version 2021.1.3
+ * Patching in backwards compatibility support for Webstorm 2019.3 - 2020.2. The next major version of this plugin
+ will drop support for any versions of Webstorm older than 2020.3
+
 ### Version 2021.1.2
  * Support Stryker version 5
 

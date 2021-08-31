@@ -49,15 +49,20 @@ runIde {
      * a different location for each platform (Windows, OSX, various Linux etc.). It works in the following steps
      *
      *  1. Look through all the directories listed and make sure they exist
-     *  2. Grab the webstorm installation directories from them (Matching something like 203.5981.135) and put it in a list
-     *  3. Sort the list by name so that we can get the ordered versions
-     *  4. Reverse the list so that the latest version is on top
-     *  5. Use the first item in the list, which should be the latest version from all the directoriesToCheck
+     *  2. Grab the webstorm installation directories from them (Matching something like 203.5981.135) and put it in a list.
+     *     If the folder you specified has children called ch-0, ch-1... such as toolbox uses, it'll recursively search into those.
+     *  3. If maxDesiredVersion is not null, it'll filter the list found above to remove any folders that are newer than that
+     *     The max version number is an integer representing the build number (193, 203, 211...), not the product name
+     *     The build number is ([two-digit-year][major release]) so 193 is 2019.3, 203 is 2020.3 and 213 is 2021.3
+     *  4. Sort the list by name so that we can get the ordered versions
+     *  5. Reverse the list so that the latest version is on top
+     *  6. Use the first item in the list, which should be the latest version from all the directoriesToCheck
      */
     def HOME = System.properties['user.home']
     def installationsFound = []
+    Integer maxDesiredVersion = 193
     def directoriesToCheck = [
-            "$HOME/.local/share/JetBrains/Toolbox/apps/WebStorm/ch-0/"
+            "$HOME/.local/share/JetBrains/Toolbox/apps/WebStorm/"
     ]
 
     directoriesToCheck.each {
@@ -66,10 +71,22 @@ runIde {
             file.eachDirMatch(~/^[0-9.]+$/) {
                 installationsFound.add([name: it.name, fullPath: it.getPath()])
             }
+
+            file.eachDirMatch(~/ch-[0-9]+$/) {
+                it.eachDirMatch(~/^[0-9.]+$/) {
+                    installationsFound.add([name: it.name, fullPath: it.getPath()])
+                }
+            }
         }
     }
 
-    installationsFound.sort{it.name}
+    if (maxDesiredVersion != null) {
+        installationsFound = installationsFound.findAll {
+            (it.name.split('\\.').first() as Integer) <= maxDesiredVersion
+        }
+    }
+
+    installationsFound.sort { it.name }
     installationsFound.reverse(true)
     println(installationsFound.first().fullPath)
 

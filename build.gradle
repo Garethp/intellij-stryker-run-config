@@ -60,7 +60,7 @@ runIde {
      */
     def HOME = System.properties['user.home']
     def installationsFound = []
-    Integer maxDesiredVersion = 193
+    Integer maxDesiredVersion = null
     def directoriesToCheck = [
             "$HOME/.local/share/JetBrains/Toolbox/apps/WebStorm/"
     ]

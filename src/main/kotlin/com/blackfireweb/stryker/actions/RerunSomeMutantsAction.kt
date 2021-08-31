@@ -15,10 +15,6 @@ class RerunSomeMutantsAction : AnAction() {
         val selectedTest = (tree.selectedTest as? SMTestProxy) ?: return false
         val testRoot = selectedTest.root ?: return false
 
-        if (testRoot::class.memberFunctions.find { it.name == "getTestConsoleProperties" } == null) {
-            return false
-        }
-
         return testRoot.testConsoleProperties is StrykerConsoleProperties && !selectedTest.isPassed
     }
 

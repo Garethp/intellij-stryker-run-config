@@ -2,6 +2,7 @@
 
 ### Version 2021.2
  * If you're on StrykerJS 5.4.0 or newer you can use intentions to automatically exclude a surviving mutation with comments
+ * Drop compatibility for Webstorm versions older than 2021.1
 
 ### Version 2021.1.3
  * Patching in backwards compatibility support for Webstorm 2019.3 - 2020.2. The next major version of this plugin
